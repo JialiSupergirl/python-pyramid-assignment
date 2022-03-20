@@ -6,12 +6,23 @@ import db
 def getMenu():
     menuList=[]
     cur = db.getConnection()
-    query = cur.execute("SELECT label, `type`, pageKey, externalURL FROM `menu` WHERE menuName = 'main' ORDER by `order`")    
+    query = cur.execute("SELECT `menuTexte`,`order` FROM `menuitem` where `menu` = 'main' order by `order`")    
     results = cur.fetchall()
     db.closeConn(cur)   
     for result in results:
         menuList.append(result[0])
     return menuList
+
+def getPage():
+    page ={"title":[], "content":[]}
+    cur = db.getConnection()
+    query = cur.execute("SELECT `pageId`,`title`,`content`,`pageName`,`script` FROM `page`")    
+    results = cur.fetchall()
+    db.closeConn(cur) 
+    for result in results:
+        page["title"].append(result[1])
+        page["content"].append(result[2])
+    return page
 
 @view_config(
     route_name='home',
@@ -19,8 +30,19 @@ def getMenu():
 ) 
 def home(request):
     items=getMenu()
-    return{"items":items}
-    
+    page = getPage()
+    pageTitle = page.get("title")[0]
+    return{"items":items,"title":pageTitle}
+   
+@view_config(
+    route_name='destination',
+    renderer="templates/destination.jinja2"
+)
+def destination(request):
+    items=getMenu()
+    page = getPage()
+    pageTitle = page.get("title")[1]
+    return{"items":items,"title":pageTitle}
 
 if __name__ == '__main__':
     
@@ -29,12 +51,13 @@ if __name__ == '__main__':
         config.include('pyramid_debugtoolbar')
         # config.add_static_view()
 
-        config.add_route('home', '/')
+        config.add_route('home', '/Home')
+        config.add_route('destination', '/Destination')
 
         config.scan()
 
         app = config.make_wsgi_app()
 
-    server = make_server('0.0.0.0', 6500, app)
+    server = make_server('0.0.0.0', 6540, app)
 
     server.serve_forever()  
