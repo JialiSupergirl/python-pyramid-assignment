@@ -49,7 +49,8 @@ if __name__ == '__main__':
     with Configurator() as config:
         config.include('pyramid_jinja2')
         config.include('pyramid_debugtoolbar')
-        # config.add_static_view()
+        config.add_static_view(name='static',
+            path='static')
 
         config.add_route('home', '/Home')
         config.add_route('destination', '/Destination')
